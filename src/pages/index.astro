@@ -6,10 +6,10 @@ import "../styles/styles.css";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
+    <title>Last Player Standing</title>
     <meta
       name="description"
-      content="Replace this with one sentence saying what this page is. A search result and a link preview both show it."
+      content="Four players, one table, and nobody telling the truth."
     />
 
     <!--
@@ -20,20 +20,56 @@ import "../styles/styles.css";
     <meta property="og:type" content="website" />
     <meta property="og:image" content="./card.png" />
     <meta name="twitter:card" content="summary_large_image" />
-
   </head>
-  <body>
+  <body data-game-state="playing">
     <header>
       <nav aria-label="Primary">
         <a href="./">Home</a>
       </nav>
     </header>
     <main>
-      <h1>COMP4020 prototype</h1>
-      <p>
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
-      </p>
+      <h1>Last Player Standing</h1>
+
+      <div id="table">
+        <section id="opponents" aria-label="Opponents"></section>
+
+        <section id="pot" aria-label="The pot">
+          <div id="pot-stack"></div>
+          <div
+            id="bid-meter"
+            class="meter"
+            role="meter"
+            aria-label="Current bid"
+            aria-valuemin="0"
+            aria-valuemax="16"
+            aria-valuenow="0"
+            aria-valuetext="No bid yet"
+          ></div>
+        </section>
+
+        <section id="you" aria-label="Your flight">
+          <div id="your-flight"></div>
+          <div
+            id="intox-meter"
+            role="meter"
+            aria-label="Your intoxication"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+            aria-valuetext="0 of 100"
+          ></div>
+        </section>
+      </div>
+
+      <section id="actions" aria-label="Your move">
+        <div id="claim" hidden></div>
+        <button id="push" type="button" hidden>Push</button>
+        <button id="doubt" type="button" hidden>Doubt</button>
+      </section>
+
+      <div id="feed" role="log" aria-live="polite"></div>
+      <p id="outcome" role="status" aria-live="assertive"></p>
+      <button id="again" type="button" hidden>Again</button>
     </main>
     <script src="../scripts/main.ts"></script>
   </body>

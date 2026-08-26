@@ -49,8 +49,34 @@ describe("spec: no instructions anywhere, on screen or off", () => {
   }
 });
 
-// TODO once the game mechanic is settled: assert play can be lost and reaches
-// an ending. This needs a DOM contract for "the game has ended" that doesn't
-// presume the mechanic — e.g. a data attribute or aria-live region set when
-// play ends. Decide the contract, then replace this stub.
-describe.todo("spec: it can be lost, and play ends somewhere");
+function freshHome() {
+  return new JSDOM(readFileSync(join(DIST, "index.html"), "utf8")).window.document;
+}
+
+describe("spec: it can be lost, and play ends somewhere", () => {
+  it("ships the ended-state contract in the built page", () => {
+    const doc = freshHome();
+    expect(doc.body.dataset.gameState).toBe("playing");
+    expect(doc.querySelector("#outcome")?.getAttribute("role")).toBe("status");
+    expect(doc.querySelector("#again")?.hasAttribute("hidden")).toBe(true);
+    expect(doc.querySelector("dialog, [role='dialog']")).toBeNull();
+  });
+
+  it("reaches an ending from every seed, and can be lost as well as won", async () => {
+    const { mountGame } = await import("../src/scripts/game/view.ts");
+    const outcomes = new Set<string>();
+    for (let seed = 1; seed <= 40; seed++) {
+      const doc = freshHome();
+      const game = mountGame(doc, { seed, autoplay: false });
+      let ticks = 0;
+      while (game.step()) expect(ticks++, `seed ${seed} did not end`).toBeLessThan(2000);
+      const ended = doc.body.dataset.gameState;
+      expect(ended, `seed ${seed}`).toMatch(/^(won|lost)$/);
+      expect(doc.querySelector("#outcome")?.textContent?.trim()).not.toBe("");
+      outcomes.add(ended!);
+      game.destroy();
+    }
+    expect(outcomes, "a wrong move must be able to lose it").toContain("lost");
+    expect(outcomes, "and an ending must be reachable in the player's favour").toContain("won");
+  });
+});

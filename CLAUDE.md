@@ -65,3 +65,16 @@ behind. `spec/README.md` draws the line.
   `import.meta.env.BASE_URL`-safe joins (strip the leading/trailing slash
   before concatenating), never as a root-absolute path --- root-absolute works
   on localhost and 404s under the Pages base path.
+- Astro inlines a hoisted script chunk under 4096 bytes directly into the built
+  HTML --- any spec test reading `doc.body.textContent` then reads source
+  string literals too. Keep forbidden vocabulary out of every string literal
+  regardless of how big the bundle ends up being.
+- jsdom can't execute `type="module"` scripts, so a built bundle in `dist/`
+  can't be driven from a parsed document. Test client behaviour by parsing the
+  built HTML and mounting the **source** module (e.g. `view.ts`) against that
+  document directly --- only Vite's bundling itself is then out of scope
+  (covered instead by `pnpm build` succeeding).
+- A DOM adapter (a `mountGame(doc, opts)`-style entry point) should take its
+  `Document` as a parameter rather than reaching for a bare global, and should
+  throw a named error naming any missing skeleton id it expects --- turns a
+  future rename into a red test instead of a silently dead page.

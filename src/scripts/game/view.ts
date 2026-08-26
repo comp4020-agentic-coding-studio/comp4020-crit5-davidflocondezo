@@ -172,7 +172,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
 
   const autoplay = options.autoplay ?? true;
   const botDelayMs = options.botDelayMs ?? 900;
-  const revealHoldMs = options.revealHoldMs ?? 1600;
+  const revealHoldMs = options.revealHoldMs ?? 2400;
 
   const refs = {
     body: doc.body,

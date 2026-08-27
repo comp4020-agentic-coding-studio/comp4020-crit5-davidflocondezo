@@ -20,6 +20,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 const REQUIRED_IDS = [
   "table",
+  "player-gauge",
   "opponents",
   "pot",
   "pot-stack",
@@ -91,6 +92,14 @@ function playerName(state: GameState, seat: number): string {
   return state.players[seat].name;
 }
 
+function worstTier(tiers: readonly Tier[]): Tier {
+  let worst = tiers[0];
+  for (const tier of tiers) {
+    if (TIER_ORDER.indexOf(tier) > TIER_ORDER.indexOf(worst)) worst = tier;
+  }
+  return worst;
+}
+
 function logEntryText(state: GameState, entry: LogEntry, appliedDamage?: number): string {
   switch (entry.kind) {
     case "round-start":
@@ -126,6 +135,44 @@ function buildGlassArt(doc: Document, tier: Tier | null): SVGSVGElement {
     const liquid = doc.createElementNS(SVG_NS, "path");
     liquid.setAttribute("class", "glass-liquid");
     liquid.setAttribute("d", "M6.5 14 L17.5 14 L17 28 L7 28 Z");
+    svg.appendChild(liquid);
+  }
+
+  return svg;
+}
+
+function tallLiquidPath(fraction: number): string {
+  const topY = 2;
+  const bottomY = 92;
+  const topLeftX = 4;
+  const topRightX = 20;
+  const bottomLeftX = 7;
+  const bottomRightX = 17;
+  const fillTopY = bottomY - fraction * (bottomY - topY);
+  const t = 1 - fraction;
+  const leftX = topLeftX + t * (bottomLeftX - topLeftX);
+  const rightX = topRightX + t * (bottomRightX - topRightX);
+  return `M${leftX} ${fillTopY} L${rightX} ${fillTopY} L${bottomRightX} ${bottomY} L${bottomLeftX} ${bottomY} Z`;
+}
+
+function buildIntoxTube(doc: Document, pct: number): SVGSVGElement {
+  const svg = doc.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", "intox-tube-art");
+  svg.setAttribute("viewBox", "0 0 24 96");
+  svg.setAttribute("aria-hidden", "true");
+
+  const outline = doc.createElementNS(SVG_NS, "path");
+  outline.setAttribute("d", "M4 2 L20 2 L17 92 L7 92 Z");
+  outline.setAttribute("fill", "none");
+  outline.setAttribute("stroke", "currentColor");
+  outline.setAttribute("stroke-width", "2");
+  svg.appendChild(outline);
+
+  const fraction = Math.max(0, Math.min(1, pct / MAX_INTOXICATION));
+  if (fraction > 0) {
+    const liquid = doc.createElementNS(SVG_NS, "path");
+    liquid.setAttribute("class", "intox-tube-liquid");
+    liquid.setAttribute("d", tallLiquidPath(fraction));
     svg.appendChild(liquid);
   }
 
@@ -177,6 +224,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
   const refs = {
     body: doc.body,
     table: requireElement<HTMLElement>(doc, "table"),
+    playerGauge: requireElement<HTMLElement>(doc, "player-gauge"),
     opponents: requireElement<HTMLElement>(doc, "opponents"),
     potStack: requireElement<HTMLElement>(doc, "pot-stack"),
     bidMeter: requireElement<HTMLElement>(doc, "bid-meter"),
@@ -194,6 +242,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
   let botSeed = state.seed * 2654435761;
   let renderedLogCount = 0;
   let lastIntoxication = state.players.map((p) => p.intoxication);
+  let humanLastDrinkTier: Tier | null = null;
   let selection: number[] = [];
   let selectedTier: Tier | null = null;
   let timers: ReturnType<typeof setTimeout>[] = [];
@@ -304,6 +353,22 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
     refs.table.style.setProperty("--intox", String(pct / MAX_INTOXICATION));
   }
 
+  function renderPlayerGauge(): void {
+    const pct = state.players[HUMAN_SEAT].intoxication;
+    refs.playerGauge.innerHTML = "";
+    if (humanLastDrinkTier) {
+      refs.playerGauge.dataset.tier = humanLastDrinkTier;
+    } else {
+      delete refs.playerGauge.dataset.tier;
+    }
+    refs.playerGauge.classList.toggle("player-gauge--danger", pct >= 80);
+    refs.playerGauge.appendChild(buildIntoxTube(doc, pct));
+    const label = doc.createElement("span");
+    label.className = "player-gauge-pct";
+    label.textContent = `${pct}%`;
+    refs.playerGauge.appendChild(label);
+  }
+
   function renderClaimEditor(): void {
     const isHumanTurn = state.turn === HUMAN_SEAT && state.phase === "playing";
     const showClaim = isHumanTurn && selection.length > 0;
@@ -358,6 +423,9 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
         const drinker = entry.resolution.drinker;
         appliedDamage = state.players[drinker].intoxication - lastIntoxication[drinker];
         lastIntoxication[drinker] = state.players[drinker].intoxication;
+        if (drinker === HUMAN_SEAT) {
+          humanLastDrinkTier = worstTier(state.pot.flatMap((potEntry) => potEntry.actual));
+        }
       }
       const line = doc.createElement("div");
       line.className = "feed-line";
@@ -384,6 +452,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
     renderOpponents();
     renderPot();
     renderYou();
+    renderPlayerGauge();
     renderClaimEditor();
     renderActions();
     renderFeed();
@@ -473,6 +542,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
       botSeed = state.seed * 2654435761;
       renderedLogCount = 0;
       lastIntoxication = state.players.map((p) => p.intoxication);
+      humanLastDrinkTier = null;
       refs.feed.innerHTML = "";
       selection = [];
       selectedTier = null;

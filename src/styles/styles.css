@@ -59,7 +59,7 @@ h1 {
 
 #table {
   display: grid;
-  grid-template-areas: "opponents" "pot" "you";
+  grid-template-areas: "gauge" "opponents" "pot" "you";
   gap: 1rem;
   padding: 1rem;
   border-radius: 0.75rem;
@@ -73,9 +73,48 @@ h1 {
 
 @media (min-width: 40rem) {
   #table {
-    grid-template-areas: "opponents pot" "opponents you";
-    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "gauge opponents pot" "gauge opponents you";
+    grid-template-columns: auto 1fr 1fr;
   }
+}
+
+#player-gauge {
+  grid-area: gauge;
+  --tier-color: var(--ink-dim);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.25rem;
+}
+
+#player-gauge[data-tier="soju"] {
+  --tier-color: var(--tier-soju);
+}
+#player-gauge[data-tier="vodka"] {
+  --tier-color: var(--tier-vodka);
+}
+#player-gauge[data-tier="tequila"] {
+  --tier-color: var(--tier-tequila);
+}
+#player-gauge[data-tier="whiskey"] {
+  --tier-color: var(--tier-whiskey);
+}
+
+.intox-tube-art {
+  width: 2.5rem;
+  height: 9rem;
+  color: var(--ink-dim);
+}
+
+.intox-tube-liquid {
+  fill: var(--tier-color);
+}
+
+.player-gauge-pct {
+  font-size: 0.75rem;
+  color: var(--ink-dim);
 }
 
 #opponents {
@@ -199,6 +238,23 @@ h1 {
 
   #table {
     animation: woozy 6s ease-in-out infinite;
+  }
+
+  #player-gauge.player-gauge--danger {
+    animation: gauge-shake 0.35s ease-in-out infinite;
+  }
+}
+
+@keyframes gauge-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-0.15rem);
+  }
+  75% {
+    transform: translateX(0.15rem);
   }
 }
 

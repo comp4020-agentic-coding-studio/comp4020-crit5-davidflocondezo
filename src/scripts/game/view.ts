@@ -300,10 +300,11 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
   function renderPot(): void {
     refs.potStack.innerHTML = "";
     const revealed = state.phase !== "playing";
+    const latestIndex = state.pot.length - 1;
 
-    for (const entry of state.pot) {
+    state.pot.forEach((entry, index) => {
       const group = doc.createElement("div");
-      group.className = "pot-group";
+      group.className = index === latestIndex ? "pot-group pot-group--latest" : "pot-group pot-group--history";
 
       const label = doc.createElement("div");
       label.className = "pot-group-label";
@@ -317,7 +318,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
       group.appendChild(row);
 
       refs.potStack.appendChild(group);
-    }
+    });
 
     const bid = currentBid(state);
     if (!bid) {

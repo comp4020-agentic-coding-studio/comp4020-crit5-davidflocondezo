@@ -1,70 +1,52 @@
 # Process overview
 
-<!-- TEMPLATE: this file is a shape to fill in, not a form. Replace everything
-     in it with your own overview, and delete this comment — `pnpm
-     check:evidence` will remind you if it's still here. -->
-
-A reading-guide to how the work came together --- a map to your process, not an
-essay about it. Markers read this file and follow its citations; they don't
-trawl the repo for evidence you didn't point at, so if a moment mattered, cite
-it.
-
-This file is the shape; the course site's
-[assessment page](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#what-you-submit)
-is the requirement, and its
-[word counts](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#word-counts)
-cover every deliverable.
-
 ## What I built
 
-One paragraph: the thing, and the idea behind it.
+**Last Player Standing** — a solo-vs-three-bots bluffing game that blends
+Liar's Dice bidding with Cheat's face-down deception, reskinned as a cartoon
+dive bar (no real alcohol; a purely fictional "Intoxication Meter"). Each round
+everyone pushes 1–4 face-down shots and claims a tier for them; a claim must
+raise the pot by quantity or by tier; a doubt reveals every push made so far
+and whoever was wrong drinks the *whole* accumulated pot, not just the last
+push. Miss 100% intoxication and you black out; last one standing wins. The
+whole ruleset is taught by the controls themselves — the push button won't
+light up for an illegal claim, and once someone claims 4 Whiskeys there's no
+raise left to offer, so doubt becomes the only live control.
 
 ## The moments that mattered
 
-Three or four for an assignment; fewer is fine for a weekly prototype. Keep the
-list short so each moment has room to do all four jobs:
+1. **The rule the whole game hinges on got its own test before any UI existed.**
+   "Whoever was wrong drinks the whole pot" is easy to get backwards (drinker
+   vs. challenger) or to under-scope (last push only, not the round's full
+   pot). I wrote the state machine (`engine.ts`) and its focused rule test
+   (`engine.test.ts`) together, DOM-free, before touching `view.ts` — so a
+   sign error would fail loud on a unit test instead of surfacing as "the game
+   feels wrong" three files later.
+   [`caccde6`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-davidflocondezo/commit/caccde6)
 
-1. **what happened** --- the problem, or the thing that went wrong
-2. **what you did instead of the obvious thing** --- the call you made, and why
-   it beat the obvious one
-3. **how you knew it was right** --- the check you ran, the viewport you looked
-   at, what you read before accepting the diff
-4. **the citation** --- a commit or commit range, a `CLAUDE.md` change, a check
-   that went from red to green, a prompt paired with the commit it produced
+2. **Actually playing the built game (not just reading green checks) found a
+   bug no unit test would catch.** `engine.test.ts` correctly asserts that a
+   resolution's `damage` is the raw sum of every shot pushed that round — that
+   part of the rule is right. But driving a real browser through a long round
+   (Playwright, `force: true` clicks because the idle "breathe" animation
+   trips its stability check) produced a pot big enough that the feed printed
+   "Pim drinks the pot: +160%." on a meter that caps at 100 — numerically
+   correct as "value of the pot," but a visible lie about what the meter just
+   did, and confusing to a player watching the number. Fixed by having
+   `view.ts` snapshot each player's intoxication before and after a resolution
+   and display the *applied* (capped) delta instead of the raw pot value,
+   leaving `engine.ts`'s own semantics (and its passing tests) untouched. I
+   re-verified with a throwaway 60-seed scratch check before deleting it: no
+   displayed percentage ever exceeds 100 again.
+   [`5ee2e8e`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-davidflocondezo/commit/5ee2e8e)
 
-Jobs 2 and 3 are the ones the repo can't tell a reader on its own, so they're
-where the marks are. The strongest moments are the ones where a correction
-landed in the **harness** --- the standards and checks your work has to satisfy
---- rather than in a retry: a rule added to `CLAUDE.md`, a check wired up, an
-attempt thrown away. Retrying until it passes is the routine case, and changing
-what the work runs against is the skilled one.
-
-Cite each moment as a link whose text is the commit hash or range and whose
-target is this repo's commit or compare URL, so a reader clicks straight to the
-evidence:
-
-- one commit: [`a1b2c3d`](https://github.com/YOUR-ORG/YOUR-REPO/commit/a1b2c3d)
-- a range:
-  [`a1b2c3d...e4f5a6b`](https://github.com/YOUR-ORG/YOUR-REPO/compare/a1b2c3d...e4f5a6b)
-
-To pair a prompt with the commit it produced, quote the prompt (curated, not a
-full transcript) next to the citation:
-
-> the prompt, verbatim
-
-Screenshots are welcome where one carries the verification better than a
-sentence does. Commit the file to this repo and link it with a **relative**
-path, which is what makes it render on GitHub: `![alt text](docs/before.png)`.
-Images don't count towards the word count and don't replace the citation.
-
-## Before you ship
-
-`pnpm check:evidence` verifies your citations resolve to real commits, that a
-reflection entry the marker reads is in `reflections/`, and that your
-`CLAUDE.md` is there --- before a marker ever opens the file. It checks that
-your map is traceable, not that it is good: the marker judges whether your
-small, deliberately chosen set of moments shows real judgement and reflection. A
-green check is not a substitute for that curation.
-
-Images aren't checked: unlike a citation whose SHA doesn't resolve, a broken
-image is visible the moment this file is rendered on GitHub.
+3. **Pacing tuned from watching a real-time playthrough, not a guess.** The
+   feed narration is the game's only rulebook (no on/off-screen instructions
+   at all), so a sentence like "Ozzy doubted Pim — it was a lie. Pim drinks
+   the pot: +75%. Pim blacks out!" has to actually be readable before the UI
+   moves on. A Playwright script that played through in real time (rather than
+   instantly stepping the engine, which is what the spec test does) showed the
+   original 1600ms reveal hold wasn't enough for the longer sentences. Bumped
+   `revealHoldMs` to 2400ms; left `botDelayMs` alone since bot-to-bot pacing
+   already read fine.
+   [`d045e94`](https://github.com/comp4020-agentic-coding-studio/comp4020-crit5-davidflocondezo/commit/d045e94)

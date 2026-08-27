@@ -202,6 +202,14 @@ export function checkElimination(state: GameState, seat: number): GameState {
   const player = next.players[seat];
   if (player.intoxication >= MAX_INTOXICATION && !player.out) {
     player.out = true;
+    if (player.kind === "human") {
+      // The human blacking out ends the game immediately -- there is no
+      // reason to keep simulating bots fighting each other for a result the
+      // player can no longer affect or see the point of.
+      next.outcome = "lost";
+      next.log.push({ kind: "game-over", outcome: "lost" });
+      return next;
+    }
     const survivors = livePlayers(next);
     if (survivors.length === 1) {
       next.outcome = survivors[0].kind === "human" ? "won" : "lost";

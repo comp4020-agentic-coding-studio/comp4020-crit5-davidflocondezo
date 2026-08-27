@@ -6,7 +6,7 @@ export const TIER_DAMAGE: Readonly<Record<Tier, number>> = {
   soju: 5,
   vodka: 10,
   tequila: 15,
-  whiskey: 25,
+  whiskey: 20,
 };
 
 export const TIER_COLOR: Readonly<Record<Tier, string>> = {

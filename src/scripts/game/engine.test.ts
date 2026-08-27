@@ -56,8 +56,8 @@ describe("rule: whoever was wrong drinks the whole pot", () => {
 
     expect(resolved.resolution?.claimWasTrue).toBe(true);
     expect(resolved.resolution?.drinker).toBe(0); // the doubter is burned
-    expect(resolved.resolution?.damage).toBe(10 + 25 + 25); // vodka + whiskey + whiskey, the WHOLE pot
-    expect(resolved.players[0].intoxication).toBe(60);
+    expect(resolved.resolution?.damage).toBe(10 + 20 + 20); // vodka + whiskey + whiskey, the WHOLE pot
+    expect(resolved.players[0].intoxication).toBe(50);
     expect(resolved.players[1].intoxication).toBe(0);
   });
 
@@ -159,6 +159,16 @@ describe("elimination: exactly at MAX_INTOXICATION, not one drink later", () => 
     let state = makeState();
     state = applyDamage(state, 0, MAX_INTOXICATION + 40);
     expect(state.players[0].intoxication).toBe(MAX_INTOXICATION);
+  });
+
+  it("ends the game the moment the human blacks out, even with two bots still live", () => {
+    let state = makeState();
+    state = applyDamage(state, 0, MAX_INTOXICATION);
+    state = checkElimination(state, 0);
+    expect(state.outcome).toBe("lost");
+    expect(state.players[0].out).toBe(true);
+    expect(state.players[1].out).toBe(false);
+    expect(state.players[2].out).toBe(false);
   });
 });
 

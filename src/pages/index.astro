@@ -1,5 +1,10 @@
 ---
 import "../styles/styles.css";
+
+// public/ assets are served from the site root, which shifts under the
+// GitHub Pages base path --- build the URL from BASE_URL rather than a
+// root-absolute "/bg.jpeg" (see CLAUDE.md's asset-path rule).
+const bgUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/bg.jpeg`;
 ---
 <!doctype html>
 <html lang="en-AU">
@@ -21,7 +26,7 @@ import "../styles/styles.css";
     <meta property="og:image" content="./card.png" />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body data-game-state="playing">
+  <body data-game-state="playing" style={`--bg-photo: url(${bgUrl});`}>
     <header>
       <nav aria-label="Primary">
         <a href="./">Home</a>

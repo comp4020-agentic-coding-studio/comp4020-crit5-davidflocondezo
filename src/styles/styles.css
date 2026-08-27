@@ -29,7 +29,21 @@ body {
   background: var(--wood-dark);
   background-image:
     radial-gradient(ellipse 70% 55% at 50% 30%, rgba(255, 200, 140, 0.16), transparent 70%),
-    repeating-linear-gradient(90deg, var(--wood) 0 3px, var(--wood-dark) 3px 7px);
+    repeating-linear-gradient(90deg, rgba(46, 32, 19, 0.45) 0 3px, rgba(22, 16, 10, 0.45) 3px 7px),
+    linear-gradient(rgba(22, 16, 10, 0.55), rgba(22, 16, 10, 0.55)),
+    var(--bg-photo);
+  background-size:
+    auto,
+    auto,
+    cover,
+    cover;
+  background-position:
+    center,
+    center,
+    center,
+    center;
+  background-repeat: repeat, repeat, no-repeat, no-repeat;
+  background-attachment: scroll, scroll, fixed, fixed;
   min-height: 100vh;
 }
 

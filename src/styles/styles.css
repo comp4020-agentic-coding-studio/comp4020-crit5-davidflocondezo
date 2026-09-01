@@ -77,6 +77,28 @@ h1 {
   clip: rect(0, 0, 0, 0);
 }
 
+.woozy-notice {
+  display: none;
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 30;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--ink-dim);
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 0.4rem;
+  text-shadow: 0 0 8px var(--neon-dim);
+  pointer-events: none;
+}
+
+body.woozy .woozy-notice {
+  display: block;
+}
+
 #table {
   display: flex;
   min-height: 28rem;
@@ -282,7 +304,20 @@ h1 {
   border-radius: 0.4rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(0, 0, 0, 0.28);
+  --tier-color: var(--ink-dim);
+}
+
+.glass.hud-glass[data-tier="soju"] {
   --tier-color: var(--tier-soju);
+}
+.glass.hud-glass[data-tier="vodka"] {
+  --tier-color: var(--tier-vodka);
+}
+.glass.hud-glass[data-tier="tequila"] {
+  --tier-color: var(--tier-tequila);
+}
+.glass.hud-glass[data-tier="whiskey"] {
+  --tier-color: var(--tier-whiskey);
 }
 
 .glass.hud-glass[aria-pressed="true"] {

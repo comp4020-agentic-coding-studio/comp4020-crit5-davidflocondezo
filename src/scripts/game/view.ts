@@ -17,6 +17,9 @@ import { chooseBotMove } from "./bots.ts";
 import { TIER_ORDER, type Tier } from "./tiers.ts";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+// Roughly two drinks in --- the point the table blur (driven by the same
+// --intox value) has actually become noticeable, not just nonzero.
+const WOOZY_THRESHOLD = 30;
 
 const REQUIRED_IDS = [
   "table",
@@ -329,8 +332,11 @@ function buildEdgeShot(doc: Document, index: number, total: number, tier: Tier, 
   button.disabled = disabled;
   // human.flight shrinks over a round (pushed shots leave it), so the spread
   // is computed from however many are actually left rather than pinned to
-  // fixed CSS nth-of-type slots sized for a fixed demo count.
-  const left = total > 1 ? 10 + index * (80 / (total - 1)) : 50;
+  // fixed CSS nth-of-type slots sized for a fixed demo count. A fixed
+  // per-glass step (rather than spreading across a fixed 10-90% span) keeps
+  // the cluster tight and centered as shots are pushed away.
+  const EDGE_SHOT_STEP = 4.5;
+  const left = 50 + (index - (total - 1) / 2) * EDGE_SHOT_STEP;
   button.style.left = `${left}%`;
   button.appendChild(buildGlass3dSvg(doc, tier));
   return button;
@@ -654,6 +660,7 @@ export function mountGame(doc: Document, options: MountOptions = {}): GameHandle
     cachedIntoxFill.style.width = `${pct}%`;
 
     refs.table.style.setProperty("--intox", String(pct / MAX_INTOXICATION));
+    refs.body.classList.toggle("woozy", pct >= WOOZY_THRESHOLD);
   }
 
   function renderEdgeShots(): void {

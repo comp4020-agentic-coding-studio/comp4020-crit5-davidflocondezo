@@ -27,6 +27,7 @@ const bgUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/bg.jpeg`;
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body data-game-state="playing" style={`--bg-photo: url(${bgUrl});`}>
+    <p id="woozy-notice" class="woozy-notice" aria-hidden="true">You're getting drunk.</p>
     <main>
       <h1>Last Player Standing</h1>
 

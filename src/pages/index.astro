@@ -27,56 +27,73 @@ const bgUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/bg.jpeg`;
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body data-game-state="playing" style={`--bg-photo: url(${bgUrl});`}>
-    <header>
-      <nav aria-label="Primary">
-        <a href="./">Home</a>
-      </nav>
-    </header>
     <main>
       <h1>Last Player Standing</h1>
 
       <div id="table">
-        <aside id="player-gauge" aria-hidden="true"></aside>
+        <aside class="hud-dock hud-dock--left" aria-hidden="true">
+          <p class="hud-heading">Intoxication meter</p>
+          <div id="player-gauge"></div>
+        </aside>
 
-        <section id="opponents" aria-label="Opponents"></section>
+        <div class="table-stage">
+          <div class="scene" id="table-scene">
+            <div class="table-plane">
+              <section id="pot" class="pot" aria-label="The pot">
+                <div id="pot-stack" class="pot-stack"></div>
+                <div
+                  id="bid-meter"
+                  class="visually-hidden"
+                  role="meter"
+                  aria-label="Current bid"
+                  aria-valuemin="0"
+                  aria-valuemax="16"
+                  aria-valuenow="0"
+                  aria-valuetext="No bid yet"
+                ></div>
+              </section>
+              <div id="table-edge-shots" class="edge-shots"></div>
+            </div>
+          </div>
+        </div>
 
-        <section id="pot" aria-label="The pot">
-          <div id="pot-stack"></div>
-          <div
-            id="bid-meter"
-            class="meter"
-            role="meter"
-            aria-label="Current bid"
-            aria-valuemin="0"
-            aria-valuemax="16"
-            aria-valuenow="0"
-            aria-valuetext="No bid yet"
-          ></div>
-        </section>
+        <aside class="hud-dock" aria-label="Game HUD">
+          <section id="opponents" class="hud-section" aria-label="Opponents"></section>
 
-        <section id="you" aria-label="Your flight">
-          <div id="your-flight"></div>
-          <div
-            id="intox-meter"
-            role="meter"
-            aria-label="Your intoxication"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-valuenow="0"
-            aria-valuetext="0 of 100"
-          ></div>
-        </section>
+          <section id="you" class="hud-section" aria-label="Your flight">
+            <p class="hud-heading">Your flight</p>
+            <div id="your-flight" class="hud-glasses"></div>
+            <div
+              id="intox-meter"
+              class="visually-hidden"
+              role="meter"
+              aria-label="Your intoxication"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-valuetext="0 of 100"
+            ></div>
+          </section>
+
+          <section id="actions" class="hud-section" aria-label="Your move">
+            <div id="claim" hidden></div>
+            <button id="push" type="button" hidden>Push</button>
+            <button id="doubt" type="button" hidden>Doubt</button>
+          </section>
+
+          <section class="hud-section hud-section--feed">
+            <p class="hud-heading">Feed</p>
+            <div id="feed" role="log" aria-live="polite"></div>
+          </section>
+        </aside>
       </div>
 
-      <section id="actions" aria-label="Your move">
-        <div id="claim" hidden></div>
-        <button id="push" type="button" hidden>Push</button>
-        <button id="doubt" type="button" hidden>Doubt</button>
-      </section>
-
-      <div id="feed" role="log" aria-live="polite"></div>
-      <p id="outcome" role="status" aria-live="assertive"></p>
-      <button id="again" type="button" hidden>Again</button>
+      <div class="outcome-modal">
+        <div class="outcome-modal-panel">
+          <p id="outcome" role="status" aria-live="assertive"></p>
+          <button id="again" type="button" hidden>Again</button>
+        </div>
+      </div>
     </main>
     <script src="../scripts/main.ts"></script>
   </body>

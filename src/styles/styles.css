@@ -2,11 +2,17 @@
   --wood-dark: #16100a;
   --wood: #2e2013;
   --wood-light: #4a3420;
+  --wood-near: #3c2818;
+  --wood-far: #140c06;
   --ink: #f2e9dc;
   --ink-dim: #c9bba6;
   --neon: #ff5da2;
   --neon-dim: #7a2f4e;
   --brass: #b98d4a;
+  --felt: #0f3d29;
+  --felt-deep: #05130c;
+  --hud: #57e9d6;
+  --hud-dim: #1c4842;
 
   --tier-soju: #3fae4b;
   --tier-vodka: #9aa0a6;
@@ -47,15 +53,6 @@ body {
   min-height: 100vh;
 }
 
-header {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--wood-light);
-}
-
-header a {
-  color: var(--brass);
-}
-
 main {
   max-width: 48rem;
   margin: 0 auto;
@@ -71,29 +68,101 @@ h1 {
   letter-spacing: 0.03em;
 }
 
-#table {
-  display: grid;
-  grid-template-areas: "gauge" "opponents" "pot" "you";
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  background: linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%);
-  box-shadow:
-    inset 0 0 0 1px var(--wood-light),
-    inset 0 12px 24px rgba(0, 0, 0, 0.5);
-  filter: blur(calc(var(--intox) * 4px));
-  transition: filter 0.4s ease;
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  clip: rect(0, 0, 0, 0);
 }
 
-@media (min-width: 40rem) {
+#table {
+  display: flex;
+  min-height: 28rem;
+  height: min(85vh, 42rem);
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%);
+  box-shadow: inset 0 12px 24px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid #000;
+  filter: blur(calc(var(--intox) * 4px));
+  transition: filter 0.4s ease;
+  /* break out of main's prose max-width --- the sketch's .stage sat directly
+     in body, full-bleed, and that edge-to-edge width is what sells the
+     "standing at the table" read instead of a boxed-in article component. */
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+@media (prefers-reduced-motion: no-preference) {
   #table {
-    grid-template-areas: "gauge opponents pot" "gauge opponents you";
-    grid-template-columns: auto 1fr 1fr;
+    animation: woozy 6s ease-in-out infinite;
   }
 }
 
+@keyframes woozy {
+  0%,
+  100% {
+    filter: blur(calc(var(--intox) * 4px));
+  }
+  50% {
+    filter: blur(calc(var(--intox) * 4px * 1.2));
+  }
+}
+
+/* ---------- HUD docks either side of the table ---------- */
+
+.hud-dock {
+  position: relative;
+  flex: 0 0 15.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  overflow-y: auto;
+  background: linear-gradient(180deg, rgba(8, 18, 17, 0.94), rgba(4, 10, 9, 0.97));
+  border-left: 1px solid var(--hud-dim);
+  box-shadow: inset 0 0 1.6rem rgba(87, 233, 214, 0.05);
+}
+
+.hud-dock--left {
+  flex: 0 0 8.5rem;
+  border-left: none;
+  border-right: 1px solid var(--hud-dim);
+  align-items: center;
+  justify-content: center;
+}
+
+.hud-dock--left .hud-heading {
+  text-align: center;
+}
+
+.hud-section {
+  flex: none;
+}
+
+.hud-section--feed {
+  flex: 1 1 auto;
+  min-height: 4rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-heading {
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud);
+  text-shadow: 0 0 6px rgba(87, 233, 214, 0.5);
+  margin: 0 0 0.5rem;
+}
+
 #player-gauge {
-  grid-area: gauge;
   --tier-color: var(--ink-dim);
   display: flex;
   flex-direction: column;
@@ -117,8 +186,8 @@ h1 {
 }
 
 .intox-tube-art {
-  width: 2.5rem;
-  height: 9rem;
+  width: 2.75rem;
+  height: 11rem;
   color: var(--ink-dim);
 }
 
@@ -127,196 +196,12 @@ h1 {
 }
 
 .player-gauge-pct {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: var(--ink-dim);
-}
-
-#opponents {
-  grid-area: opponents;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-#pot {
-  grid-area: pot;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background: radial-gradient(ellipse at center, #1d5c3c 0%, #0f3324 100%);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
-  min-height: 5rem;
-  max-height: 16rem;
-}
-
-#you {
-  grid-area: you;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.seat {
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
-  background: rgba(0, 0, 0, 0.25);
-  min-width: 8rem;
-}
-
-.seat-name {
-  font-weight: 600;
-}
-
-.meter {
-  height: 0.6rem;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  margin-top: 0.35rem;
-}
-
-.meter-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--tier-vodka), var(--neon));
-  transition: width 0.3s ease;
-}
-
-#your-flight {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-#pot-stack {
-  display: flex;
-  flex-wrap: wrap;
-  align-content: flex-start;
-  align-items: flex-start;
-  gap: 0.6rem;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.pot-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.pot-group-label {
-  font-size: 0.75rem;
-  color: var(--ink-dim);
-  white-space: nowrap;
-}
-
-.pot-group-glasses {
-  display: flex;
-  gap: 0.4rem;
-}
-
-/* Every push but the most recent shrinks so the pot panel keeps a fixed
-   size instead of growing (and pushing the page into a scroll) as a round
-   goes on --- only the latest push stays full-size. */
-.pot-group--history {
-  gap: 0.15rem;
-  opacity: 0.85;
-}
-
-.pot-group--history .pot-group-label {
-  font-size: 0.6rem;
-}
-
-.pot-group--history .pot-group-glasses {
-  gap: 0.2rem;
-}
-
-.pot-group--history .glass {
-  padding: 0.2rem;
-  border-width: 1px;
-}
-
-.pot-group--history .glass-art {
-  width: 1rem;
-  height: 1.25rem;
-}
-
-.pot-group--history .glass-label,
-.pot-group--history .glass-pips {
-  display: none;
-}
-
-.glass {
-  --tier-color: var(--tier-soju);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  border: 1px solid var(--wood-light);
-  border-radius: 0.5rem;
-  background: rgba(0, 0, 0, 0.25);
-  color: var(--ink);
-  cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
-}
-
-.glass:hover,
-.glass:focus-visible {
-  transform: translateY(-0.2rem);
-  box-shadow: 0 0.3rem 0.6rem rgba(0, 0, 0, 0.4);
-}
-
-.glass[aria-pressed="true"] {
-  outline: 2px solid var(--neon);
-  outline-offset: 2px;
-}
-
-.glass[data-tier="soju"] {
-  --tier-color: var(--tier-soju);
-}
-.glass[data-tier="vodka"] {
-  --tier-color: var(--tier-vodka);
-}
-.glass[data-tier="tequila"] {
-  --tier-color: var(--tier-tequila);
-}
-.glass[data-tier="whiskey"] {
-  --tier-color: var(--tier-whiskey);
-}
-
-.glass-art {
-  width: 2rem;
-  height: 2.5rem;
-}
-
-.glass-liquid {
-  fill: var(--tier-color);
-}
-
-.glass-pips {
-  letter-spacing: 0.1rem;
-  color: var(--tier-color);
-}
-
-.glass-facedown .glass-art {
-  opacity: 0.35;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .glass {
-    animation: breathe 4s ease-in-out infinite;
-  }
-
-  #table {
-    animation: woozy 6s ease-in-out infinite;
-  }
-
   #player-gauge.player-gauge--danger {
     animation: gauge-shake 0.35s ease-in-out infinite;
   }
@@ -335,6 +220,110 @@ h1 {
   }
 }
 
+#opponents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.seat {
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 6.5rem;
+  flex: 1 1 6.5rem;
+}
+
+.seat-out {
+  opacity: 0.45;
+}
+
+.seat-name {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.meter {
+  height: 0.4rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  margin-top: 0.3rem;
+}
+
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--tier-vodka), var(--neon));
+  transition: width 0.3s ease;
+}
+
+#you {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hud-glasses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.glass.hud-glass {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem;
+  border-radius: 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.28);
+  --tier-color: var(--tier-soju);
+}
+
+.glass.hud-glass[aria-pressed="true"] {
+  outline: 2px solid var(--hud);
+  outline-offset: 1px;
+  background: rgba(87, 233, 214, 0.14);
+}
+
+.glass.hud-glass:focus-visible {
+  outline: 2px solid var(--hud);
+  outline-offset: 2px;
+}
+
+.glass.hud-glass:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.hud-glass .glass3d-svg {
+  width: 1.5rem;
+  height: 2.1rem;
+}
+
+.glass-label {
+  font-size: 0.64rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.glass-pips {
+  letter-spacing: 0.1rem;
+  color: var(--tier-color);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .glass.hud-glass {
+    animation: breathe 4s ease-in-out infinite;
+  }
+}
+
 @keyframes breathe {
   0%,
   100% {
@@ -345,44 +334,41 @@ h1 {
   }
 }
 
-@keyframes woozy {
-  0%,
-  100% {
-    filter: blur(calc(var(--intox) * 4px));
-  }
-  50% {
-    filter: blur(calc(var(--intox) * 4px * 1.2));
-  }
-}
+/* claim + actions */
 
 #actions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 #claim {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
   align-items: center;
 }
 
 .tier-choice {
-  border: 1px solid var(--wood-light);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 999px;
-  padding: 0.35rem 0.9rem;
+  padding: 0.3rem 0.7rem;
   background: rgba(0, 0, 0, 0.3);
-  color: var(--ink);
+  color: var(--ink-dim);
   cursor: pointer;
+  font-size: 0.74rem;
 }
 
 .tier-choice[aria-pressed="true"] {
   background: var(--tier-color, var(--neon-dim));
   color: #10100e;
   font-weight: 700;
+  border-color: transparent;
+}
+
+.tier-choice:focus-visible {
+  outline: 2px solid var(--hud);
+  outline-offset: 2px;
 }
 
 button {
@@ -405,6 +391,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+#push,
+#doubt {
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  align-self: flex-start;
+}
+
+#doubt {
+  background: linear-gradient(180deg, var(--neon), var(--neon-dim));
+}
+
 #claim[hidden],
 #push[hidden],
 #doubt[hidden],
@@ -412,19 +409,63 @@ button:disabled {
   display: none;
 }
 
+/* feed */
+
 #feed {
-  margin-top: 1.5rem;
-  max-height: 10rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
   overflow-y: auto;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  background: rgba(0, 0, 0, 0.3);
-  font-size: 0.9rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.feed-line {
+  font-size: 0.76rem;
+  line-height: 1.4;
   color: var(--ink-dim);
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.3rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid var(--hud-dim);
+}
+
+.feed-line:last-child {
+  color: var(--ink);
+  border-left-color: var(--hud);
+}
+
+.outcome-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(5, 3, 1, 0.72);
+}
+
+body[data-game-state="won"] .outcome-modal,
+body[data-game-state="lost"] .outcome-modal {
+  display: flex;
+}
+
+.outcome-modal-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  max-width: 22rem;
+  padding: 2rem 2.5rem;
+  background: linear-gradient(180deg, var(--wood-near), var(--wood-dark));
+  border: 1px solid var(--wood-light);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
 }
 
 #outcome:not(:empty) {
-  margin-top: 1rem;
+  margin: 0;
   text-align: center;
   font-size: 1.3rem;
   text-shadow:
@@ -432,6 +473,236 @@ button:disabled {
     0 0 16px var(--neon-dim);
 }
 
+button#again {
+  display: block;
+}
+
 a {
   color: var(--brass);
+}
+
+/* ---------- pseudo-3d table stage ---------- */
+
+.table-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 8%, rgba(255, 93, 162, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(28, 17, 8, 0.55) 0%, rgba(15, 9, 5, 0.8) 60%),
+    var(--bg-photo);
+  background-size:
+    auto,
+    auto,
+    cover;
+  background-position:
+    center,
+    center,
+    center 35%;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  perspective: 2600px;
+  perspective-origin: 50% 20%;
+}
+
+.scene.shake {
+  animation: thud 0.28s ease;
+}
+
+@keyframes thud {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.table-plane {
+  position: absolute;
+  left: 50%;
+  bottom: -55%;
+  width: 150%;
+  height: 130%;
+  transform: translateX(-50%) rotateX(88deg);
+  transform-style: preserve-3d;
+  border-radius: 6% / 4%;
+  background:
+    repeating-linear-gradient(100deg, rgba(0, 0, 0, 0.16) 0 24px, transparent 24px 48px),
+    linear-gradient(var(--wood-near), var(--wood-far));
+  box-shadow: inset 0 0 10rem 3rem rgba(0, 0, 0, 0.65);
+}
+
+.pot {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  transform-style: preserve-3d;
+  width: 74%;
+  height: 48%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, var(--felt) 0%, var(--felt-deep) 100%);
+  box-shadow:
+    inset 0 0.4rem 1.4rem rgba(0, 0, 0, 0.7),
+    0 0 2.5rem rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pot-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  transform-style: preserve-3d;
+}
+
+.pot-hint {
+  color: var(--ink-dim);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.pot-shot {
+  display: inline-flex;
+  transform: rotateX(-88deg);
+  transform-origin: 50% 50%;
+}
+
+.pot-shot.pot-shot--history {
+  opacity: 0.6;
+}
+
+.pot-shot .glass3d-svg {
+  width: 40px;
+  height: 74px;
+  display: block;
+}
+
+.edge-shots {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.edge-shot {
+  all: unset;
+  position: absolute;
+  bottom: 8%;
+  width: 15%;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: rotateX(-88deg);
+  transform-origin: 50% 100%;
+}
+
+.edge-shot .glass3d-svg {
+  width: 40px;
+  height: 74px;
+  display: block;
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+}
+
+.edge-shot:hover .glass3d-svg {
+  transform: translateY(-4px);
+  filter: brightness(1.2);
+}
+
+.edge-shot[aria-pressed="true"] .glass3d-svg {
+  outline: 2px solid var(--hud);
+}
+
+.edge-shot:disabled {
+  pointer-events: none;
+}
+
+.edge-shot:disabled .glass3d-svg {
+  opacity: 0.35;
+}
+
+.glass3d-svg {
+  flex: none;
+  overflow: visible;
+}
+
+.pot-liquid-overlay {
+  position: fixed;
+  z-index: 6;
+  pointer-events: none;
+  clip-path: polygon(0% 0%, 100% 0%, 86% 100%, 14% 100%);
+}
+
+.pot-liquid-overlay--pending {
+  clip-path: none;
+}
+
+.flying-shot {
+  position: fixed;
+  z-index: 500;
+  pointer-events: none;
+  transition: transform 0.42s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.flying-shot .glass3d-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flying-shot {
+    transition: none;
+  }
+  .scene.shake {
+    animation: none;
+  }
+}
+
+@media (max-width: 46rem) {
+  #table {
+    flex-direction: column;
+    height: min(94vh, 52rem);
+  }
+  .table-stage {
+    flex: 1 1 auto;
+    order: 2;
+  }
+  .hud-dock {
+    flex: 0 0 auto;
+    max-height: 40%;
+    border-left: none;
+    border-top: 1px solid var(--hud-dim);
+    order: 3;
+  }
+  .hud-dock--left {
+    border-right: none;
+    border-bottom: 1px solid var(--hud-dim);
+    order: 1;
+    max-height: none;
+    padding: 0.6rem;
+  }
+  .intox-tube-art {
+    height: 6rem;
+    width: 2rem;
+  }
 }

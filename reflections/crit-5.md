@@ -2,27 +2,19 @@
 
 **What was the breakthrough that moved the work forward?**
 
-Splitting the game into a DOM-free `engine.ts` (pure state transitions) and a
-single DOM-touching `view.ts` adapter. Once that split existed, the two hardest
-things about a bluffing game — "does the whole-pot rule ever compute the wrong
-drinker" and "does the game always end" — stopped being questions I had to
-answer by playing dozens of games by hand. `engine.test.ts` pins the rule
-directly; `view.ts` exposes a `step()` that lets a test drive an entire game,
-including the human seat, through the bot heuristic, so I could assert "every
-one of 40 seeds reaches an ending, and both `won` and `lost` are reachable" as
-a normal, fast, deterministic test. The breakthrough wasn't the split itself —
-it's obvious architecture — it was noticing that the same seam that makes the
-engine unit-testable also makes the *whole game* automatable for the harder
-spec claim ("it can be lost"), without writing a second, test-only code path.
+I think coming up with the look-and-feel and mechanics of the game so that
+they will be easy to recognise/understand how to play was challenging. 
+I had to think of visual cues and focus on how to make it easy for players to pick up.
+As part of this I essentially created 3 versions of the game. The first just focusing
+on the functionality, the second focusing on making it easy to use and the third being 
+a major UI overhaul to add context and setting to the game.
+This required constant rounds of testing that the agent and tests alone could not do
+which meant a lot of manual testing from my end. This was essential to get the final
+look-and-feel that the game ships with.
 
 **What did this work change about who I want to be as a software developer?**
 
-It sharpened a habit I already had but hadn't earned yet: a green test suite
-and an actual playthrough answer different questions. `engine.test.ts` was
-fully green and correctly asserting the whole-pot damage value the entire
-time I had a real bug — the feed was displaying that same correct number in a
-place where it read as a lie to a player, because the meter caps and the raw
-pot value doesn't. No unit test was ever going to catch that; only watching
-the number scroll past in a browser did. I want to keep treating "the tests
-pass" as necessary evidence, not sufficient evidence, and to keep budgeting
-real time for driving the actual rendered page before calling something done.
+It enforced my belief that a green test suite and an actual playthrough answer different questions. For example there were several instances when `engine.test.ts` was
+fully green and correctly asserting that the 'life' bar value was correct however
+when I played it a couple of times I ran into the issue that the feed was displaying 
+the incorrect number, because the meter caps but the amount of shots a player could take doesn't. No unit test was ever going to catch that; only watching the number scroll past in a browser did. Moving forward, I want to acknowledge when tests pass but also supplement testing with my own manual testing.
